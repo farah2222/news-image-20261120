@@ -33,4 +33,12 @@ if (!startsWith(image, PNG_MAGIC) && !startsWith(image, JPEG_MAGIC)) {
 
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "entry.png"), image);
+const outPath = join(outDir, "entry.png");
+writeFileSync(outPath, image);
+
+// Write-verify: re-read the output and refuse to finish silently if
+// the copy came out different from the source image.
+const written = readFileSync(outPath);
+if (!written.equals(image)) {
+  throw new Error("entry.png copy failed verification: output bytes differ from source");
+}
